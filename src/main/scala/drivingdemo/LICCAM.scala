@@ -21,8 +21,8 @@ object LICCAM {
   }
 
   def run_success = {
-//    import org.apache.log4j.BasicConfigurator
-//    BasicConfigurator.configure()
+    import org.apache.log4j.BasicConfigurator
+    BasicConfigurator.configure()
 
     /*
     Create the communication layer
@@ -34,7 +34,7 @@ object LICCAM {
 
     // Create System
     val mas = MAS()
-    val system: ActorSystem[IMessage] = typed.ActorSystem(mas(), "MAS")
+    val system: ActorSystem[IMessage] = typed.ActorSystem(mas(createHTTPServer = true, HTTPPort = 8585), "MAS")
 
     implicit val timeout: Timeout = 5000.milliseconds
     implicit val ec: ExecutionContextExecutor = system.executionContext

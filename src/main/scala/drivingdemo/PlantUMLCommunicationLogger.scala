@@ -76,9 +76,7 @@ case class PlantUMLCommunicationLogger() extends CommunicationLogger {
   def writeToPNG(fileName:String) : Unit = {
     for (lines <- messages.indices) {
       writeToPNG(fileName,messages.take(lines+1).toList)
-      println("")
     }
-    messages.clear()
   }
 
   private def writeToPNG(filename: String,seq: List[String]): Unit = {

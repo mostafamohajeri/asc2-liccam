@@ -7,6 +7,8 @@ cases(0).
 +!alert(Car,Speed,Confidence) : Sender = #executionContext.src.name && sensors(Sender) && cases(C)  =>
     T = #java.time.Instant.now().getEpochSecond;
     Id = #asString(Car) + #asString("_") + #asString(C+1);
+    -cases(C);
+    +cases(C+1);
     +log(Id,Car,Speed,Confidence,T);
     !try_intervention(Id,Car,Speed,Confidence).
 
