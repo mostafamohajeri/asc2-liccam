@@ -13,3 +13,7 @@ The project uses Scala `2.13.3` or up, Java `11` or up, and for building it uses
 
 ## Running the project
 The main function of the demo is located at `src/main/scala/drivingdemo/LICCAM.scala` that can be execute by `sbt run`
+
+The agent scripts are located at `src/main/asl`
+
+

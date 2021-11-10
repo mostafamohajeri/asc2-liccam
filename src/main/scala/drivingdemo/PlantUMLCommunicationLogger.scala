@@ -25,15 +25,12 @@ case class PlantUMLCommunicationLogger() extends CommunicationLogger {
 
   import java.io._
 
-  var gVizMessages : ListBuffer[String] = new ListBuffer[String]()
   var messages : ListBuffer[String] = new ListBuffer[String]()
 
   def addMsg(msg: String) = synchronized {
     println(msg)
     messages.addOne(msg)
   }
-
-
 
   def writeToFile(filename: String,pre:String,post:String): Unit = {
     val pw = new PrintWriter(new File(f"logs/$filename.txt" ))

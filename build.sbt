@@ -1,6 +1,6 @@
 import sbt.{ThisBuild, file}
 licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
-lazy val AkkaVersion = "2.6.10"
+lazy val AkkaVersion = "2.6.17"
 name := "legal-intervententions-demo"
 
 version := "0.1"
@@ -15,8 +15,8 @@ libraryDependencies += "nl.uva.sne.cci" % "agentscript-parser" % "2.27"
 libraryDependencies += "nl.uva.sne.cci" % "agentscript-scala-generator" % "2.27"
 libraryDependencies += "nl.uva.sne.cci" %% "styla" % "0.2.2"
 
-libraryDependencies += "nl.uva.sne.cci" % "agentscript-grounds_2.13" % "0.2.32"
-libraryDependencies += "nl.uva.sne.cci" % "agentscript-commons_2.13" % "0.2.32"
+libraryDependencies += "nl.uva.sne.cci" % "agentscript-grounds_2.13" % "0.2.40"
+libraryDependencies += "nl.uva.sne.cci" % "agentscript-commons_2.13" % "0.2.40"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.3" % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test
@@ -32,18 +32,8 @@ libraryDependencies += "guru.nidi" % "graphviz-java" % "0.18.1"
 
 enablePlugins(AgentScriptCCPlugin)
 
-  (agentScriptCC / agentScriptCCPath) in Compile :=  (baseDirectory.value / "src" / "main" / "asl")
-
-
-  Compile / sourceGenerators += (Compile / agentScriptCC).taskValue
-  skip in publish := true
-  jacocoReportSettings := JacocoReportSettings(
-    "Jacoco Coverage Report",
-    None,
-    JacocoThresholds(),
-    Seq(JacocoReportFormats.ScalaHTML),
-    "utf-8")
-
+(agentScriptCC / agentScriptCCPath) in Compile :=  (baseDirectory.value / "src" / "main" / "asl")
+ Compile / sourceGenerators += (Compile / agentScriptCC).taskValue
 
 
 classLoaderLayeringStrategy in Test := ClassLoaderLayeringStrategy.ScalaLibrary

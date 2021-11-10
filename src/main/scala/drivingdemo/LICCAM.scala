@@ -1,9 +1,17 @@
 package drivingdemo
 
-import akka.actor.typed.ActorSystem
+import akka.actor.typed
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior, Scheduler}
+import akka.util.Timeout
+import asl.sensor
+import bb.IBeliefBase
 import bb.expstyla.exp.{GenericTerm, IntTerm, StructTerm}
-import infrastructure.{AgentRequest, AgentRequestMessage, AkkaMessageSource, GoalMessage, IMessage, MAS}
+import infrastructure.{AgentRequest, AgentRequestMessage, AkkaMessageSource, DummyMessageSource, ExecutionContext, GoalMessage, IMessage, ISubGoalMessage, IYellowPages, InitEndMessage, IntentionDoneMessage, MAS, Parameters, ReadyMessage, StartMessage, SubGoalMessage}
 import std.DefaultCommunications
+import akka.actor.typed.scaladsl.AskPattern._
+import _root_.scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 object LICCAM {
 
@@ -13,16 +21,27 @@ object LICCAM {
   }
 
   def run_success = {
-    import org.apache.log4j.BasicConfigurator
-    BasicConfigurator.configure()
+//    import org.apache.log4j.BasicConfigurator
+//    BasicConfigurator.configure()
+
+    /*
+    Create the communication layer
+     */
     val logger = PlantUMLCommunicationLogger()
     val loggableComs = new DefaultCommunications(logger)
     Environment.comsLogger = logger
     Environment.logActors(Seq("car1","sensor1","monitor","enforcer","oem1","oracle"))
 
+    // Create System
     val mas = MAS()
-    val system: ActorSystem[IMessage] = ActorSystem(mas(name = "__MAS",createHTTPServer = true,HTTPPort = 3030), "MAS")
-    system ! AgentRequestMessage(
+    val system: ActorSystem[IMessage] = typed.ActorSystem(mas(), "MAS")
+
+    implicit val timeout: Timeout = 5000.milliseconds
+    implicit val ec: ExecutionContextExecutor = system.executionContext
+    implicit val scheduler: Scheduler = system.scheduler
+
+    // Ask the system to create agents
+    val result: Future[IMessage] = system.ask(ref => AgentRequestMessage(
       Seq(
         AgentRequest(new asl.sensor(coms=loggableComs).agentBuilder, "sensor1", 1),
         AgentRequest(new asl.car(coms=loggableComs).agentBuilder, "car1", 1),
@@ -31,104 +50,39 @@ object LICCAM {
         AgentRequest(new asl.enforcer(coms=loggableComs).agentBuilder, "enforcer", 1),
         AgentRequest(new asl.oracle(coms=loggableComs).agentBuilder, "oracle", 1),
         AgentRequest(new asl.environment(coms=loggableComs).agentBuilder, "scenario", 1)
-      ),
-      null)
-    Thread.sleep(5000)
+      ),ref))
 
-    val environment = mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address()
-    Environment.environmentActor = AkkaMessageSource(environment.ref)
+    //wait for response
+    val system_ready : Boolean = try {
+      val response = Await.result(result, timeout.duration).asInstanceOf[ReadyMessage]
+      true
+    }
+    catch {
+      case _ =>
+        false
+    }
 
+    if(system_ready) {
 
-    mas.yellowPages.getAll().filter(n=>n._1.contains("sensor")).foreach(a => Environment.sensors.put(a._1,a._2))
-    mas.yellowPages.getAll().filter(n=>n._1.contains("car")).foreach(a => Environment.cars.put(a._1,Car(a._1)))
+      // extract the scenario agent ref
+      val environment = mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address()
+      Environment.environmentActor = AkkaMessageSource(environment)
 
-    mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("start",Seq()),Environment.environmentActor)
+      //extract cars and sensors for ethe environment
+      mas.yellowPages.getAll().filter(n => n._1.contains("sensor")).foreach(a => Environment.sensors.put(a._1, a._2))
+      mas.yellowPages.getAll().filter(n => n._1.contains("car")).foreach(a => Environment.cars.put(a._1, Car(a._1)))
 
+      // tell scenario to start
+      mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("start", Seq()), Environment.environmentActor)
 
-    Thread.sleep(6000)
+      // wait for finish
+      Thread.sleep(6000)
 
-    Environment.print_to_file("all")
+      // write the message to file "./logs/<name>.png"
+      Environment.print_to_file("all")
+    }
   }
 
 
-  def run_bad_oem = {
-        import org.apache.log4j.BasicConfigurator
-        BasicConfigurator.configure()
-    val logger = PlantUMLCommunicationLogger()
-    val loggableComs = new DefaultCommunications(logger)
-
-    val mas = MAS()
-    val system: ActorSystem[IMessage] = ActorSystem(mas(), "MAS")
-    system ! AgentRequestMessage(
-      Seq(
-        AgentRequest(new asl.sensor(coms=loggableComs).agentBuilder, "sensor1", 1),
-        AgentRequest(new asl.car(coms=loggableComs).agentBuilder, "car1", 1),
-        AgentRequest(new asl.oem(coms=loggableComs).agentBuilder, "oem1", 1),
-        AgentRequest(new asl.monitor(coms=loggableComs).agentBuilder, "monitor", 1),
-        AgentRequest(new asl.enforcer(coms=loggableComs).agentBuilder, "enforcer", 1),
-        AgentRequest(new asl.oracle(coms=loggableComs).agentBuilder, "oracle", 1),
-        AgentRequest(new asl.environment().agentBuilder, "scenario", 1)
-      ),
-      null)
-    Thread.sleep(5000)
-
-
-
-    val environment = mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address()
-    Environment.environmentActor = AkkaMessageSource(environment.ref)
-    Environment.comsLogger = logger
-
-    mas.yellowPages.getAll().filter(n=>n._1.contains("sensor")).foreach(a => Environment.sensors.put(a._1,a._2))
-    mas.yellowPages.getAll().filter(n=>n._1.contains("car")).foreach(a => Environment.cars.put(a._1,Car(a._1)))
-
-    mas.yellowPages.getAgent("car1").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("set_speed",Seq(IntTerm(140))),Environment.environmentActor)
-    Thread.sleep(3000)
-
-    Environment.print_to_file("all")
-  }
-
-  def  run_success_2  = {
-        import org.apache.log4j.BasicConfigurator
-        BasicConfigurator.configure()
-    val logger = PlantUMLCommunicationLogger()
-    val loggableComs = new DefaultCommunications(logger)
-
-    val mas = MAS()
-    val system: ActorSystem[IMessage] = ActorSystem(mas(), "MAS")
-    system ! AgentRequestMessage(
-      Seq(
-        AgentRequest(new asl.sensor(coms=loggableComs).agentBuilder, "sensor1", 1),
-        AgentRequest(new asl.car(coms=loggableComs).agentBuilder, "car", 4),
-        AgentRequest(new asl.oem(coms=loggableComs).agentBuilder, "oem1", 1),
-        AgentRequest(new asl.monitor(coms=loggableComs).agentBuilder, "monitor", 1),
-        AgentRequest(new asl.enforcer(coms=loggableComs).agentBuilder, "enforcer", 1),
-        AgentRequest(new asl.oracle(coms=loggableComs).agentBuilder, "oracle", 1),
-        AgentRequest(new asl.environment().agentBuilder, "scenario", 1)
-      ),
-      null)
-    Thread.sleep(10000)
-
-
-
-    val environment = mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address()
-    Environment.environmentActor = AkkaMessageSource(environment.ref)
-    Environment.comsLogger = logger
-    Environment.logActors(mas.yellowPages.getAll().keys.toSeq.filter(a => !a.contains("__")))
-
-    mas.yellowPages.getAll().filter(n=>n._1.contains("sensor")).foreach(a => Environment.sensors.put(a._1,a._2))
-    mas.yellowPages.getAll().filter(n=>n._1.contains("car")).foreach(a => Environment.cars.put(a._1,Car(a._1)))
-
-    mas.yellowPages.getAgent("car1").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("set_speed",Seq(IntTerm(150))),Environment.environmentActor)
-
-    mas.yellowPages.getAgent("car2").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("set_speed",Seq(IntTerm(130))),Environment.environmentActor)
-//
-    mas.yellowPages.getAgent("car3").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("set_speed",Seq(IntTerm(140))),Environment.environmentActor)
-
-    mas.yellowPages.getAgent("car4").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("set_speed",Seq(IntTerm(180))),Environment.environmentActor)
-
-    Thread.sleep(6000)
-
-    Environment.print_to_file("all")
-  }
 
 }

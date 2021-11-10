@@ -8,7 +8,6 @@ cases(0).
     T = #java.time.Instant.now().getEpochSecond;
     Id = #asString(Car) + #asString("_") + #asString(C+1);
     +log(Id,Car,Speed,Confidence,T);
-    #println("alert recieved");
     !try_intervention(Id,Car,Speed,Confidence).
 
 +!try_intervention(Id,Car,Speed,Confidence) : Speed > 90 && Speed < 120 && Confidence < 0.75 =>
