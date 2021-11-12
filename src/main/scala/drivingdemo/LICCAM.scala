@@ -10,6 +10,8 @@ import bb.expstyla.exp.{GenericTerm, IntTerm, StructTerm}
 import infrastructure.{AgentRequest, AgentRequestMessage, AkkaMessageSource, DummyMessageSource, ExecutionContext, GoalMessage, IMessage, ISubGoalMessage, IYellowPages, InitEndMessage, IntentionDoneMessage, MAS, Parameters, ReadyMessage, StartMessage, SubGoalMessage}
 import std.DefaultCommunications
 import akka.actor.typed.scaladsl.AskPattern._
+  import akka.management.scaladsl.AkkaManagement
+import akka.management.cluster.bootstrap.ClusterBootstrap
 import _root_.scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -34,8 +36,10 @@ object LICCAM {
 
     // Create System
     val mas = MAS()
-    val system: ActorSystem[IMessage] = typed.ActorSystem(mas(createHTTPServer = true, HTTPPort = 8585), "MAS")
+    val system: ActorSystem[IMessage] = typed.ActorSystem(mas(), "MAS")
 
+    AkkaManagement(system).start()
+//    ClusterBootstrap(system).start()
     implicit val timeout: Timeout = 5000.milliseconds
     implicit val ec: ExecutionContextExecutor = system.executionContext
     implicit val scheduler: Scheduler = system.scheduler
@@ -62,8 +66,10 @@ object LICCAM {
         false
     }
 
-    if(system_ready) {
 
+
+    if(system_ready) {
+      new MonitorServer(system).run(mas.yellowPages.getAgent("monitor").get)
       // extract the scenario agent ref
       val environment = mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address()
       Environment.environmentActor = AkkaMessageSource(environment)
@@ -76,11 +82,13 @@ object LICCAM {
       mas.yellowPages.getAgent("scenario").get.asInstanceOf[AkkaMessageSource].address() ! GoalMessage(StructTerm("start", Seq()), Environment.environmentActor)
 
       // wait for finish
-      Thread.sleep(6000)
+      Thread.sleep(5000)
 
       // write the message to file "./logs/<name>.png"
       Environment.print_to_file("all")
     }
+
+//    system.terminate()
   }
 
 

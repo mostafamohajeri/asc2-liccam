@@ -6,70 +6,9 @@ participant monitor
 participant enforcer
 participant oem1
 participant oracle
-car1->oem1 : !register(gfENJSVxF5)
+car1->oem1 : !register(OMLcUJD07L)
 scenario->car1 : !set_speed(150)
 car1-->car1 : setting speed to:150
 sensor1-->sensor1 : Detected: car1, Speed:150
-sensor1->monitor : !alert(car1,150,1.0)
-monitor-->monitor : Speed > 120: Intervention Required
-monitor->enforcer : !intervene(car1_1,car1,150,1.0)
-enforcer-->enforcer : Intervention: set_speed(90)
-enforcer-->enforcer : OEM:oem1
-enforcer->oracle : !give_warrant(car1_1,car1,oem1,monitor,set_speed(90))
-oracle->monitor : ?confirm_alert(car1_1,car1)
-monitor-->oracle : true
-oracle->enforcer : !serve_warrant(car1_1,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-enforcer->monitor : +intervention_validated(car1_1)
-enforcer->oem1 : ?intervention_access(car1,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oem1->oracle : ?validate_warrant(warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oracle-->oem1 : true
-oem1->car1 : ?execute_command(set_speed(90),gfENJSVxF5)
-car1-->car1 : setting speed to:90
-car1-->oem1 : speed_changed(90,90)
-sensor1-->sensor1 : Detected: car1, Speed:90
-oem1-->enforcer : executed_command(set_speed(90),speed_changed(90,90))
-enforcer->oracle : !close_case(car1_1,speed_changed(90,90))
-car1-->car1 : setting speed to:220
-sensor1-->sensor1 : Detected: car1, Speed:220
-sensor1->monitor : !alert(car1,220,1.0)
-monitor-->monitor : Speed > 120: Intervention Required
-monitor->enforcer : !intervene(car1_2,car1,220,1.0)
-enforcer-->enforcer : Intervention: set_speed(90)
-enforcer-->enforcer : OEM:oem1
-enforcer->oracle : !give_warrant(car1_2,car1,oem1,monitor,set_speed(90))
-oracle->monitor : ?confirm_alert(car1_2,car1)
-monitor-->oracle : true
-oracle->enforcer : !serve_warrant(car1_2,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-enforcer->monitor : +intervention_validated(car1_2)
-enforcer->oem1 : ?intervention_access(car1,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oem1->oracle : ?validate_warrant(warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oracle-->oem1 : true
-oem1->car1 : ?execute_command(set_speed(90),gfENJSVxF5)
-car1-->car1 : setting speed to:90
-sensor1-->sensor1 : Detected: car1, Speed:90
-car1-->oem1 : speed_changed(90,90)
-oem1-->enforcer : executed_command(set_speed(90),speed_changed(90,90))
-enforcer->oracle : !close_case(car1_2,speed_changed(90,90))
-car1-->car1 : setting speed to:220
-sensor1-->sensor1 : Detected: car1, Speed:220
-sensor1->monitor : !alert(car1,220,1.0)
-monitor-->monitor : Speed > 120: Intervention Required
-monitor->enforcer : !intervene(car1_3,car1,220,1.0)
-enforcer-->enforcer : Intervention: set_speed(90)
-enforcer-->enforcer : OEM:oem1
-enforcer->oracle : !give_warrant(car1_3,car1,oem1,monitor,set_speed(90))
-oracle->monitor : ?confirm_alert(car1_3,car1)
-monitor-->oracle : true
-oracle->enforcer : !serve_warrant(car1_3,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-enforcer->monitor : +intervention_validated(car1_3)
-enforcer->oem1 : ?intervention_access(car1,warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oem1->oracle : ?validate_warrant(warrant(car1,oem1,set_speed(90),enforcer,oracle,oracle_1))
-oracle-->oem1 : true
-oem1->car1 : ?execute_command(set_speed(90),gfENJSVxF5)
-car1-->car1 : setting speed to:90
-sensor1-->sensor1 : Detected: car1, Speed:90
-car1-->oem1 : speed_changed(90,90)
-oem1-->enforcer : executed_command(set_speed(90),speed_changed(90,90))
-enforcer->oracle : !close_case(car1_3,speed_changed(90,90))
 
 @enduml

@@ -4,7 +4,7 @@ sensors("sensor3").
 cases(0).
 
 @atomic
-+!alert(Car,Speed,Confidence) : Sender = #executionContext.src.name && sensors(Sender) && cases(C)  =>
++!alert(Car,Speed,Confidence) : cases(C)  =>
     T = #java.time.Instant.now().getEpochSecond;
     Id = #asString(Car) + #asString("_") + #asString(C+1);
     -cases(C);
