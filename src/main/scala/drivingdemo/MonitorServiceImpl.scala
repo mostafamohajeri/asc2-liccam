@@ -25,7 +25,7 @@ class MonitorServiceImpl(system: ActorSystem[_],iMessageSource: IMessageSource) 
   override def alert(request: AlertRequest): Future[AlertReply] = {
     iMessageSource.asInstanceOf[AkkaMessageSource].address() !
       GoalMessage(StructTerm("alert", Seq(StringTerm(request.car),IntTerm(request.speed),DoubleTerm(request.confidence))), Environment.environmentActor)
-    Future.successful(AlertReply(s"Hello, ${request.car}"))
+    Future.successful(AlertReply(s"alert received for: ${request.car}"))
   }
 
 
