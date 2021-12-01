@@ -1,4 +1,4 @@
-package drivingdemo
+package liccam
 
 case class Car(id: String) {
   var speed : Int = 0

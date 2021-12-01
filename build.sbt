@@ -31,8 +31,8 @@ libraryDependencies += "nl.uva.sne.cci" % "agentscript-parser" % "2.27"
 libraryDependencies += "nl.uva.sne.cci" % "agentscript-scala-generator" % "2.27"
 libraryDependencies += "nl.uva.sne.cci" %% "styla" % "0.2.2"
 
-libraryDependencies += "nl.uva.sne.cci" % "agentscript-grounds_2.13" % "0.2.40"
-libraryDependencies += "nl.uva.sne.cci" % "agentscript-commons_2.13" % "0.2.40"
+libraryDependencies += "nl.uva.sne.cci" % "agentscript-grounds_2.13" % "0.2.41"
+libraryDependencies += "nl.uva.sne.cci" % "agentscript-commons_2.13" % "0.2.41"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.3" % Test
 libraryDependencies += "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test

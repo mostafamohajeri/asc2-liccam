@@ -1,0 +1,13 @@
+syntax = "proto3";
+package liccam;
+
+import "intervention.proto";
+
+// ====================== OEM ========================
+
+service EnvironmentConnector {
+	rpc SendInterventionToCar(Intervention) returns (InterventionResponse) {};
+};
+
+
+// ===================================================

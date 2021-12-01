@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package liccam;
+
+import "intervention.proto";
+import "empty.proto";
+
+// ====================== DT framework ====================
+
+service DT_Framework {
+    rpc RunSimulation(SimulationDescriptions) returns (Empty) {};
+};
+
+
+message SimulationDescriptions {
+    repeated Intervention interventions = 1;
+	// Intervention intervention = 1;
+}
+

@@ -16,7 +16,7 @@ oem("oem1").
 +!respond(set_speed(S)) : speed(Speed) => #coms.respond(speed_changed(S,Speed)).
 
 +!set_speed(Speed) : N = #executionContext.name =>
-    #drivingdemo.Environment.set_speed(#asInteger(Speed));
-    #drivingdemo.Environment.logEvent("setting speed to:" + Speed);
+    #liccam.Environment.set_speed(#asInteger(Speed));
+    #liccam.Environment.logEvent("setting speed to:" + Speed);
     -speed(_);
     +speed(Speed).

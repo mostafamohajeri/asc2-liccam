@@ -1,0 +1,16 @@
+syntax = "proto3";
+package liccam;
+
+import "set_speed.proto";
+
+
+message Intervention {
+	oneof Payload {
+		SetSpeed set_speed = 1;
+	};
+	string car_id = 2;
+}
+
+message InterventionResponse {
+	bool success = 1;	
+}

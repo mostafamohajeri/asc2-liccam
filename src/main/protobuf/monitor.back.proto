@@ -1,0 +1,25 @@
+//#service-request-reply
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "liccam";
+option java_outer_classname = "MonitorProto";
+
+
+service MonitorService {
+
+    rpc Alert (AlertRequest) returns (AlertReply) {}
+
+}
+
+
+message AlertRequest {
+    string car = 1;
+    int32 speed = 2;
+    double confidence = 3;
+}
+
+message AlertReply {
+    string message = 1;
+}
+//#service-request-reply

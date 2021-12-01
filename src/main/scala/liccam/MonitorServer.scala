@@ -1,4 +1,4 @@
-package drivingdemo
+package liccam
 
 import java.security.KeyStore
 import java.security.SecureRandom
@@ -15,7 +15,9 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.pki.pem.DERPrivateKeyLoader
 import akka.pki.pem.PEMDecoder
 import com.typesafe.config.ConfigFactory
+
 import infrastructure.IMessageSource
+import liccam.MonitorHandler
 
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
@@ -33,11 +35,10 @@ class MonitorServer(system: ActorSystem[_]) {
     implicit val ec: ExecutionContext = system.executionContext
 
     val service: HttpRequest => Future[HttpResponse] =
-      MonitorServiceHandler.withServerReflection(new MonitorServiceImpl(system,iMessageSource))
+      MonitorHandler.withServerReflection(new MonitorImpl(system,iMessageSource))
 
     val bound: Future[Http.ServerBinding] = Http(system)
-      .newServerAt(interface = "127.0.0.1", port = 8080)
-      .enableHttps(serverHttpContext)
+      .newServerAt(interface = "127.0.0.1", port = 8181)
       .bind(service)
       .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 10.seconds))
 
@@ -53,27 +54,27 @@ class MonitorServer(system: ActorSystem[_]) {
     bound
   }
 
-  private def serverHttpContext: HttpsConnectionContext = {
-    val privateKey =
-      DERPrivateKeyLoader.load(PEMDecoder.decode(readPrivateKeyPem()))
-    val fact = CertificateFactory.getInstance("X.509")
-    val cer = fact.generateCertificate(
-      classOf[MonitorServer].getResourceAsStream("/certs/server1.pem")
-    )
-    val ks = KeyStore.getInstance("PKCS12")
-    ks.load(null)
-    ks.setKeyEntry(
-      "private",
-      privateKey,
-      new Array[Char](0),
-      Array[Certificate](cer)
-    )
-    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
-    keyManagerFactory.init(ks, null)
-    val context = SSLContext.getInstance("TLS")
-    context.init(keyManagerFactory.getKeyManagers, null, new SecureRandom)
-    ConnectionContext.https(context)
-  }
+//  private def serverHttpContext: HttpsConnectionContext = {
+//    val privateKey =
+//      DERPrivateKeyLoader.load(PEMDecoder.decode(readPrivateKeyPem()))
+//    val fact = CertificateFactory.getInstance("X.509")
+//    val cer = fact.generateCertificate(
+//      classOf[MonitorServer].getResourceAsStream("/certs/server1.pem")
+//    )
+//    val ks = KeyStore.getInstance("PKCS12")
+//    ks.load(null)
+//    ks.setKeyEntry(
+//      "private",
+//      privateKey,
+//      new Array[Char](0),
+//      Array[Certificate](cer)
+//    )
+//    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+//    keyManagerFactory.init(ks, null)
+//    val context = SSLContext.getInstance("TLS")
+//    context.init(keyManagerFactory.getKeyManagers, null, new SecureRandom)
+//    ConnectionContext.https(context)
+//  }
 
   private def readPrivateKeyPem(): String =
     Source.fromResource("certs/server1.key").mkString

@@ -1,0 +1,13 @@
+syntax = "proto3";
+package liccam;
+
+import "monitor.proto";
+
+// ====================== OEM ========================
+
+service EnforcingAgent {
+	rpc SendStatus(Status) returns (StatusResponse) {};
+};
+
+
+// ===================================================

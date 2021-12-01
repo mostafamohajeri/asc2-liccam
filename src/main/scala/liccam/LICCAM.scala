@@ -1,4 +1,4 @@
-package drivingdemo
+package liccam
 
 import akka.actor.typed
 import akka.actor.typed.scaladsl.Behaviors

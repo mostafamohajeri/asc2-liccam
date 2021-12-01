@@ -4,6 +4,14 @@ sensors("sensor3").
 cases(0).
 
 @atomic
++!alert(Car,Assessments)  =>
+    #println(Car);
+    for(A in member(A,Assessments)) {
+        #println(A);
+    }.
+
+
+@atomic
 +!alert(Car,Speed,Confidence) : cases(C)  =>
     T = #java.time.Instant.now().getEpochSecond;
     Id = #asString(Car) + #asString("_") + #asString(C+1);
@@ -13,15 +21,15 @@ cases(0).
     !try_intervention(Id,Car,Speed,Confidence).
 
 +!try_intervention(Id,Car,Speed,Confidence) : Speed > 90 && Speed < 120 && Confidence < 0.75 =>
-    #drivingdemo.Environment.logEvent("Operator Intervention Required").
+    #liccam.Environment.logEvent("Operator Intervention Required").
 
 +!try_intervention(Id,Car,Speed,Confidence) : Speed > 90 && Speed < 120 && Confidence > 0.75 =>
-     #drivingdemo.Environment.logEvent("Speed < 120: No intervention").
+     #liccam.Environment.logEvent("Speed < 120: No intervention").
 
 +!try_intervention(Id,Car,Speed,Confidence) : Speed >= 120 =>
     T = #java.time.Instant.now().getEpochSecond;
     +case(Id,Car,Speed,Confidence,T);
-    #drivingdemo.Environment.logEvent("Speed > 120: Intervention Required");
+    #liccam.Environment.logEvent("Speed > 120: Intervention Required");
     #coms.achieve("enforcer",intervene(Id,Car,Speed,Confidence)).
 
 

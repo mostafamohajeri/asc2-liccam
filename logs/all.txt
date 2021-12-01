@@ -6,9 +6,10 @@ participant monitor
 participant enforcer
 participant oem1
 participant oracle
-car1->oem1 : !register(OMLcUJD07L)
+car1->oem1 : !register(qV644uVHi0)
 scenario->car1 : !set_speed(150)
 car1-->car1 : setting speed to:150
 sensor1-->sensor1 : Detected: car1, Speed:150
+sensor1->monitor : !alert(car1,150,1.0)
 
 @enduml

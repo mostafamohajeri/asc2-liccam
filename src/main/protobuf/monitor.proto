@@ -1,25 +1,37 @@
-//#service-request-reply
 syntax = "proto3";
+package liccam;
+
+import "intervention.proto";
+import "empty.proto";
 
 option java_multiple_files = true;
-option java_package = "drivingdemo";
+option java_package = "liccam";
 option java_outer_classname = "MonitorProto";
 
+// ====================== Monitor ====================
 
-service MonitorService {
+service Monitor {
+    rpc SendStatus(Status) returns (StatusResponse) {};
+};
 
-    rpc Alert (AlertRequest) returns (AlertReply) {}
-
+message Assessments {
+    Intervention intervention = 1;
+    float probability = 2;
+    float risk = 3;
+    float intervention_risk = 4;
 }
 
-
-message AlertRequest {
-    string car = 1;
-    int32 speed = 2;
-    double confidence = 3;
+message Status {
+    string car_id = 1;
+    repeated Assessments assessment = 2;
 }
 
-message AlertReply {
-    string message = 1;
+message StatusResponse {
+    enum State {
+	    STARTED = 0;
+	    FINISHED = 1;
+    };
+    State state = 1;
 }
-//#service-request-reply
+
+// ===================================================

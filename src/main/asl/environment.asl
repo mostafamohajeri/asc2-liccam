@@ -10,4 +10,4 @@
 
 
 +!print(File) =>
-    #drivingdemo.Environment.print_to_file(#asString(File)).
+    #liccam.Environment.print_to_file(#asString(File)).

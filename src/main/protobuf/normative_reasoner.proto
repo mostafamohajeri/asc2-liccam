@@ -1,0 +1,59 @@
+syntax = "proto3";
+package liccam;
+
+import "monitor.proto";
+
+service NormativeReasoner {
+    rpc RequestEWarrant(EWarrantRequest) returns (EWarrantResponse) {};
+    rpc VerifyEWarrant(EWarrantVerificationRequest) returns (EwarrantVerificationResponse) {};
+};
+
+message Scope {
+    // encodes which actions this warrant covers, e.g. ("setSpeed", ">80")
+    // TODO  would be better to encode both key and value as actual types which are oneof inside to accomodate various types of scopes we might have in the system 
+    map<string, string> entries = 1;
+};
+
+message EWarrant {
+    string token = 1; 
+    Scope scope = 2;
+};
+
+message Evidence {
+    // TODO  later this should become oneof, when more types become available
+    Status status = 1;
+};
+
+message EWarrantRequest {
+    Scope scope = 1;
+    Evidence evidence = 2;
+};
+
+message EWarrantResponse {
+    message Granted {
+        EWarrant e_warrant = 1;
+    };
+    message Denied {
+        map<string, string> reasons = 1; 
+    };
+    oneof response {
+        EWarrantResponse.Granted granted = 1;
+        EWarrantResponse.Denied denied = 2;
+    };
+};
+
+message EWarrantVerificationRequest {
+    EWarrant e_warrant = 1;
+};
+
+message EwarrantVerificationResponse {
+    enum State {
+        VALID = 0;
+        INVALID = 1;
+    };
+    State state = 1;
+    EWarrant e_warrant = 2;
+};
+
+
+// ===================================================

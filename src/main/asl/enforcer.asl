@@ -11,9 +11,9 @@ controller("car4","oem1").
 
 
 +!try_access(CaseID,Car,Monitor) : controller(Car,Controller) =>
-    Intervention = #drivingdemo.Utils.decide_intervention;
-    #drivingdemo.Environment.logEvent("Intervention: " + Intervention);
-    #drivingdemo.Environment.logEvent("OEM:" + Controller);
+    Intervention = #liccam.Utils.decide_intervention;
+    #liccam.Environment.logEvent("Intervention: " + Intervention);
+    #liccam.Environment.logEvent("OEM:" + Controller);
     #coms.achieve("oracle",give_warrant(CaseID,Car,Controller,Monitor,Intervention)).
 
 
